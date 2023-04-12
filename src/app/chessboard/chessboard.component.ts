@@ -8,8 +8,9 @@ type Position = [number, number];
   styleUrls: ['./chessboard.component.css'],
 })
 export class ChessboardComponent implements OnInit {
-
-  currentFen: string = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR';
+  currentFen: string =
+    localStorage.getItem('fen') ??
+    'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR';
 
   currentBoard: any[][] = [];
 
@@ -23,25 +24,24 @@ export class ChessboardComponent implements OnInit {
 
   canBeCaptured: Position[] = [];
 
-  previousMoveFrom: Position | undefined
-  previousMoveTo: Position | undefined
+  previousMoveFrom: Position | undefined;
+  previousMoveTo: Position | undefined;
 
   ngOnInit(): void {
     this.currentBoard = [];
-    
+
     this.whiteToPlay = true;
-    
+
     this.selectedSquare = undefined;
-    
+
     this.selectedPiece = undefined;
-    
+
     this.suggestedSquares = [];
-    
+
     this.canBeCaptured = [];
 
-    this.previousMoveFrom = undefined
-    this.previousMoveTo =  undefined
-
+    this.previousMoveFrom = undefined;
+    this.previousMoveTo = undefined;
 
     this.currentBoard = this.fenToArray(this.currentFen);
   }
@@ -116,9 +116,57 @@ export class ChessboardComponent implements OnInit {
       legalMoves = [...legalMoves, ...this.getKingMoves()];
     }
 
-    legalMoves = legalMoves.filter(move => !this.arrayEqual(move, this.selectedSquare))
+    if (this.selectedPiece?.toLowerCase() == 'p') {
+      legalMoves = [...legalMoves, ...this.getPawnMoves()];
+    }
+
+    legalMoves = legalMoves.filter(
+      (move) => !this.arrayEqual(move, this.selectedSquare)
+    );
 
     return legalMoves;
+  }
+
+  getPawnMoves(): Position[] {
+    if (!this.selectedSquare) return [];
+    let pawnMoves: Position[] = [];
+
+    let directions: number[] = [];
+    let currentPosition = this.selectedSquare!;
+
+    if (this.whiteToPlay) directions.push(-1, -9, 7);
+    if (!this.whiteToPlay) directions.push(1, 9, -7);
+
+    if (this.whiteToPlay && currentPosition[0] == 6) directions.push(-2);
+    if (!this.whiteToPlay && currentPosition[0] == 1) directions.push(2);
+
+    if(currentPosition[1] == 0) directions = directions.filter(dir => ![-9, -7].includes(dir))
+    
+    
+    directions.forEach((dir) => {
+      currentPosition = this.selectedSquare!;
+      currentPosition = this.peekPiece(currentPosition, dir);
+
+      if ((dir == -1 || dir == 1 || dir == -2 || dir == 2) && this.currentBoard[currentPosition[0]][currentPosition[1]]) {
+        return;
+      }
+
+      if (this.isOwnPiece(currentPosition)) {
+        return;
+      }
+
+      if (this.canItBeCaptured(currentPosition)) {
+        this.canBeCaptured.push(currentPosition);
+        pawnMoves.push(currentPosition);
+        return;
+      }
+
+      if (dir == -1 || dir == 1 || dir == -2 || dir == 2) {
+        pawnMoves.push(currentPosition);
+      }
+    });
+
+    return pawnMoves;
   }
 
   getKingMoves(): Position[] {
@@ -130,20 +178,19 @@ export class ChessboardComponent implements OnInit {
     directions.forEach((dir) => {
       let currentPosition = this.selectedSquare!;
       if (this.isLastAvailableSquare(currentPosition, dir)) {
-        return
+        return;
       }
       currentPosition = this.peekPiece(currentPosition, dir);
-      
+
       if (this.isOwnPiece(currentPosition)) {
-        return 
+        return;
       }
 
       if (this.canItBeCaptured(currentPosition)) {
         this.canBeCaptured.push(currentPosition);
         kingMoves.push(currentPosition);
-        return
+        return;
       }
-
 
       kingMoves.push(currentPosition);
     });
@@ -307,8 +354,8 @@ export class ChessboardComponent implements OnInit {
 
   movePiece(desiredSquare: Position) {
     if (!this.selectedSquare) return;
-    this.previousMoveFrom = this.selectedSquare
-    this.previousMoveTo = desiredSquare
+    this.previousMoveFrom = this.selectedSquare;
+    this.previousMoveTo = desiredSquare;
     this.currentBoard[desiredSquare[0]][desiredSquare[1]] =
       this.currentBoard[this.selectedSquare[0]][this.selectedSquare[1]];
     this.currentBoard[this.selectedSquare[0]][this.selectedSquare[1]] = null;
@@ -391,19 +438,31 @@ export class ChessboardComponent implements OnInit {
     return fenString;
   }
 
-  resetBoard(){
-    this.currentFen = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR'
-    this.ngOnInit()
+  resetBoard() {
+    this.currentFen = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR';
+    this.ngOnInit();
+    localStorage.setItem('fen', this.currentFen);
   }
 
-  fenToClipboard(){
-    navigator.clipboard.writeText(this.getFenString())
+  fenToClipboard() {
+    navigator.clipboard.writeText(this.getFenString());
   }
 
-  loadFen(fen: string, element: HTMLInputElement){
-    element.value = ''
-    if(!fen) return
-    this.currentFen = fen
-    this.ngOnInit()
+  loadFen(fen: string, element: HTMLInputElement) {
+    element.value = '';
+    if (!fen) return;
+    this.currentFen = fen;
+    this.ngOnInit();
+  }
+
+  saveAsStartingPosition() {
+    localStorage.setItem('fen', this.currentFen);
+  }
+
+  loadStartingPosition() {
+    this.currentFen =
+      localStorage.getItem('fen') ??
+      'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR';
+    this.ngOnInit();
   }
 }

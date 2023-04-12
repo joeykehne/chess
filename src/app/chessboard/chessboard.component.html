@@ -46,7 +46,9 @@
     </div>
   </div>
   <div class="buttons">
-    <button (click)="resetBoard()">Reset Board</button>
+    <button (click)="resetBoard()">Clear</button>
+    <button (click)="loadStartingPosition()">Load Starting Position</button>
+    <button (click)="saveAsStartingPosition()">Save as Starting Position</button>
     <button (click)="fenToClipboard()">Copy Fen to Clipboard</button>
     <div>
       <input #fen type="text" name="fenString" placeholder="Insert FEN">
