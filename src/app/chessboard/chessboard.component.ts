@@ -8,7 +8,8 @@ type Position = [number, number];
   styleUrls: ['./chessboard.component.css'],
 })
 export class ChessboardComponent implements OnInit {
-  currentFen: string = 'rnbqkbnr/8/8/8/8/8/8/RNBQKBNR';
+
+  currentFen: string = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR';
 
   currentBoard: any[][] = [];
 
@@ -26,6 +27,22 @@ export class ChessboardComponent implements OnInit {
   previousMoveTo: Position | undefined
 
   ngOnInit(): void {
+    this.currentBoard = [];
+    
+    this.whiteToPlay = true;
+    
+    this.selectedSquare = undefined;
+    
+    this.selectedPiece = undefined;
+    
+    this.suggestedSquares = [];
+    
+    this.canBeCaptured = [];
+
+    this.previousMoveFrom = undefined
+    this.previousMoveTo =  undefined
+
+
     this.currentBoard = this.fenToArray(this.currentFen);
   }
 
@@ -372,5 +389,21 @@ export class ChessboardComponent implements OnInit {
       }
     }
     return fenString;
+  }
+
+  resetBoard(){
+    this.currentFen = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR'
+    this.ngOnInit()
+  }
+
+  fenToClipboard(){
+    navigator.clipboard.writeText(this.getFenString())
+  }
+
+  loadFen(fen: string, element: HTMLInputElement){
+    element.value = ''
+    if(!fen) return
+    this.currentFen = fen
+    this.ngOnInit()
   }
 }

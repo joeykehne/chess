@@ -1,22 +1,56 @@
-<div class="board">
-  <div class="row" *ngFor="let row of [].constructor(8); let rowNr = index">
-    <div
-      class="spot"
-      *ngFor="let col of [].constructor(8); let spotNr = index"
-      [ngClass]="{
-        previousMoveFrom: this.arrayEqual(this.previousMoveFrom, [rowNr, spotNr]),
-        previousMoveTo: this.arrayEqual(this.previousMoveTo, [rowNr, spotNr]),
-        selected: this.arrayEqual(this.selectedSquare, [rowNr, spotNr]),
-        light: ((rowNr % 2) + (spotNr % 2)) % 2
-      }"
-      (click)="squareClicked(rowNr, spotNr)"
-    >
-      <img *ngIf="this.currentBoard[rowNr][spotNr]" class="piece" src="assets/pieces/{{this.currentBoard[rowNr][spotNr] | imageName}}.svg" />
-      <div class="suggestion" *ngIf="containsPosition([rowNr, spotNr], this.suggestedSquares) && !containsPosition([rowNr, spotNr], this.canBeCaptured)"></div>
-      <div class="canBeCapturedOuter" *ngIf="this.containsPosition([rowNr, spotNr], this.canBeCaptured)">
-        <div *ngIf="((rowNr % 2) + (spotNr % 2)) % 2" class="canBeCapturedLightInner"></div>
-        <div *ngIf="!(((rowNr % 2) + (spotNr % 2)) % 2)" class="canBeCapturedDarkInner"></div>
+<div class="wrapper">
+  <div class="board">
+    <div class="row" *ngFor="let row of [].constructor(8); let rowNr = index">
+      <div
+        class="spot"
+        *ngFor="let col of [].constructor(8); let spotNr = index"
+        [ngClass]="{
+          previousMoveFrom: this.arrayEqual(this.previousMoveFrom, [
+            rowNr,
+            spotNr
+          ]),
+          previousMoveTo: this.arrayEqual(this.previousMoveTo, [rowNr, spotNr]),
+          selected: this.arrayEqual(this.selectedSquare, [rowNr, spotNr]),
+          light: ((rowNr % 2) + (spotNr % 2)) % 2
+        }"
+        (click)="squareClicked(rowNr, spotNr)"
+      >
+        <img
+          *ngIf="this.currentBoard[rowNr][spotNr]"
+          class="piece"
+          src="assets/pieces/{{
+            this.currentBoard[rowNr][spotNr] | imageName
+          }}.svg"
+        />
+        <div
+          class="suggestion"
+          *ngIf="
+            containsPosition([rowNr, spotNr], this.suggestedSquares) &&
+            !containsPosition([rowNr, spotNr], this.canBeCaptured)
+          "
+        ></div>
+        <div
+          class="canBeCapturedOuter"
+          *ngIf="this.containsPosition([rowNr, spotNr], this.canBeCaptured)"
+        >
+          <div
+            *ngIf="((rowNr % 2) + (spotNr % 2)) % 2"
+            class="canBeCapturedLightInner"
+          ></div>
+          <div
+            *ngIf="!(((rowNr % 2) + (spotNr % 2)) % 2)"
+            class="canBeCapturedDarkInner"
+          ></div>
+        </div>
       </div>
+    </div>
+  </div>
+  <div class="buttons">
+    <button (click)="resetBoard()">Reset Board</button>
+    <button (click)="fenToClipboard()">Copy Fen to Clipboard</button>
+    <div>
+      <input #fen type="text" name="fenString" placeholder="Insert FEN">
+      <button (click)="loadFen(fen.value, fen)">Load FEN</button>
     </div>
   </div>
 </div>
