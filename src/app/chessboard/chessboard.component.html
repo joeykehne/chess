@@ -1,0 +1,17 @@
+<div class="board">
+  <div class="row" *ngFor="let row of [].constructor(8); let rowNr = index">
+    <div
+      class="spot"
+      *ngFor="let col of [].constructor(8); let spotNr = index"
+      [ngClass]="{
+        canBeCaptured: this.containsPosition([rowNr, spotNr], this.canBeCaptured),
+        selected: this.arrayEqual(this.selectedSquare, [rowNr, spotNr]),
+        light: ((rowNr % 2) + (spotNr % 2)) % 2
+      }"
+      (click)="squareClicked(rowNr, spotNr)"
+    >
+      <img *ngIf="this.currentBoard[rowNr][spotNr]" class="piece" src="assets/pieces/{{this.currentBoard[rowNr][spotNr] | imageName}}.svg" />
+      <div class="suggestion" *ngIf="containsPosition([rowNr, spotNr], this.suggestedSquares) && !containsPosition([rowNr, spotNr], this.canBeCaptured)"></div>
+    </div>
+  </div>
+</div>
