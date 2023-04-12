@@ -15,11 +15,15 @@ export class ChessboardComponent implements OnInit {
   whiteToPlay: boolean = true;
 
   selectedSquare: Position | undefined;
+
   selectedPiece: string | undefined;
 
   suggestedSquares: Position[] = [];
 
   canBeCaptured: Position[] = [];
+
+  previousMoveFrom: Position | undefined
+  previousMoveTo: Position | undefined
 
   ngOnInit(): void {
     this.currentBoard = this.fenToArray(this.currentFen);
@@ -94,6 +98,8 @@ export class ChessboardComponent implements OnInit {
     if (this.selectedPiece?.toLowerCase() == 'k') {
       legalMoves = [...legalMoves, ...this.getKingMoves()];
     }
+
+    legalMoves = legalMoves.filter(move => !this.arrayEqual(move, this.selectedSquare))
 
     return legalMoves;
   }
@@ -284,6 +290,8 @@ export class ChessboardComponent implements OnInit {
 
   movePiece(desiredSquare: Position) {
     if (!this.selectedSquare) return;
+    this.previousMoveFrom = this.selectedSquare
+    this.previousMoveTo = desiredSquare
     this.currentBoard[desiredSquare[0]][desiredSquare[1]] =
       this.currentBoard[this.selectedSquare[0]][this.selectedSquare[1]];
     this.currentBoard[this.selectedSquare[0]][this.selectedSquare[1]] = null;

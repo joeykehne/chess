@@ -4,7 +4,8 @@
       class="spot"
       *ngFor="let col of [].constructor(8); let spotNr = index"
       [ngClass]="{
-        canBeCaptured: this.containsPosition([rowNr, spotNr], this.canBeCaptured),
+        previousMoveFrom: this.arrayEqual(this.previousMoveFrom, [rowNr, spotNr]),
+        previousMoveTo: this.arrayEqual(this.previousMoveTo, [rowNr, spotNr]),
         selected: this.arrayEqual(this.selectedSquare, [rowNr, spotNr]),
         light: ((rowNr % 2) + (spotNr % 2)) % 2
       }"
@@ -12,6 +13,10 @@
     >
       <img *ngIf="this.currentBoard[rowNr][spotNr]" class="piece" src="assets/pieces/{{this.currentBoard[rowNr][spotNr] | imageName}}.svg" />
       <div class="suggestion" *ngIf="containsPosition([rowNr, spotNr], this.suggestedSquares) && !containsPosition([rowNr, spotNr], this.canBeCaptured)"></div>
+      <div class="canBeCapturedOuter" *ngIf="this.containsPosition([rowNr, spotNr], this.canBeCaptured)">
+        <div *ngIf="((rowNr % 2) + (spotNr % 2)) % 2" class="canBeCapturedLightInner"></div>
+        <div *ngIf="!(((rowNr % 2) + (spotNr % 2)) % 2)" class="canBeCapturedDarkInner"></div>
+      </div>
     </div>
   </div>
 </div>
