@@ -76,150 +76,186 @@ export class ChessboardComponent implements OnInit {
       let directions = [-9, -7, 7, 9];
       legalMoves = [...legalMoves, ...this.getDirectionalMoves(directions)];
     }
-    
+
     if (this.selectedPiece?.toLowerCase() == 'r') {
       let directions = [-8, -1, 1, 8];
       legalMoves = [...legalMoves, ...this.getDirectionalMoves(directions)];
     }
-    
+
     if (this.selectedPiece?.toLowerCase() == 'q') {
       let directions = [-9, -7, 7, 9, -8, -1, 1, 8];
       legalMoves = [...legalMoves, ...this.getDirectionalMoves(directions)];
     }
-    
+
     if (this.selectedPiece?.toLowerCase() == 'n') {
       legalMoves = [...legalMoves, ...this.getKnightMoves()];
     }
-    
+
+    if (this.selectedPiece?.toLowerCase() == 'k') {
+      legalMoves = [...legalMoves, ...this.getKingMoves()];
+    }
 
     return legalMoves;
   }
 
-  getKnightMoves(): Position[]{
-
+  getKingMoves(): Position[] {
     if (!this.selectedSquare) return [];
-    let knightMoves: Position[] = []
+    let kingMoves: Position[] = [];
+
+    let directions = [-9, -7, 7, 9, -8, -1, 1, 8];
+
+    directions.forEach((dir) => {
+      let currentPosition = this.selectedSquare!;
+      if (this.isLastAvailableSquare(currentPosition, dir)) {
+        return
+      }
+      currentPosition = this.peekPiece(currentPosition, dir);
+      
+      if (this.isOwnPiece(currentPosition)) {
+        return 
+      }
+
+      if (this.canItBeCaptured(currentPosition)) {
+        this.canBeCaptured.push(currentPosition);
+        kingMoves.push(currentPosition);
+        return
+      }
+
+
+      kingMoves.push(currentPosition);
+    });
+
+    return kingMoves;
+  }
+
+  getKnightMoves(): Position[] {
+    if (!this.selectedSquare) return [];
+    let knightMoves: Position[] = [];
     let currentPosition = this.selectedSquare;
 
-    let directions = [6, 10, 15, 17, -6, -10, -15, -17]
-    
-    // Top
-    if(currentPosition[0] == 0 || currentPosition[0] == 1){
-      directions = directions.filter(pos => pos != -10)
-      directions = directions.filter(pos => pos != 6)
+    let directions = [6, 10, 15, 17, -6, -10, -15, -17];
 
-      if(currentPosition[0] == 0){
-        directions = directions.filter(pos => pos != -17)
-        directions = directions.filter(pos => pos != 15)
+    // Top
+    if (currentPosition[0] == 0 || currentPosition[0] == 1) {
+      directions = directions.filter((pos) => pos != -10);
+      directions = directions.filter((pos) => pos != 6);
+
+      if (currentPosition[0] == 0) {
+        directions = directions.filter((pos) => pos != -17);
+        directions = directions.filter((pos) => pos != 15);
       }
     }
 
     // Bottom
-    if(currentPosition[0] == 6 || currentPosition[0] == 7){
-      directions = directions.filter(pos => pos != 10)
-      directions = directions.filter(pos => pos != -6)
+    if (currentPosition[0] == 6 || currentPosition[0] == 7) {
+      directions = directions.filter((pos) => pos != 10);
+      directions = directions.filter((pos) => pos != -6);
 
-      if(currentPosition[0] == 7){
-        directions = directions.filter(pos => pos != 17)
-        directions = directions.filter(pos => pos != -15)
+      if (currentPosition[0] == 7) {
+        directions = directions.filter((pos) => pos != 17);
+        directions = directions.filter((pos) => pos != -15);
       }
     }
 
     // Left
-    if(currentPosition[1] == 0 || currentPosition[1] == 1){
-      directions = directions.filter(pos => pos != -17)
-      directions = directions.filter(pos => pos != -15)
+    if (currentPosition[1] == 0 || currentPosition[1] == 1) {
+      directions = directions.filter((pos) => pos != -17);
+      directions = directions.filter((pos) => pos != -15);
 
-      if(currentPosition[1] == 0){
-        directions = directions.filter(pos => pos != -10)
-        directions = directions.filter(pos => pos != -6)
+      if (currentPosition[1] == 0) {
+        directions = directions.filter((pos) => pos != -10);
+        directions = directions.filter((pos) => pos != -6);
       }
     }
 
     // Right
-    if(currentPosition[1] == 6 || currentPosition[1] == 7){
-      directions = directions.filter(pos => pos != 17)
-      directions = directions.filter(pos => pos != 15)
+    if (currentPosition[1] == 6 || currentPosition[1] == 7) {
+      directions = directions.filter((pos) => pos != 17);
+      directions = directions.filter((pos) => pos != 15);
 
-      if(currentPosition[1] == 7){
-        directions = directions.filter(pos => pos != 10)
-        directions = directions.filter(pos => pos != 6)
+      if (currentPosition[1] == 7) {
+        directions = directions.filter((pos) => pos != 10);
+        directions = directions.filter((pos) => pos != 6);
       }
-    }    
+    }
 
-    directions.forEach(dir => {
-      knightMoves.push(this.peekPiece(currentPosition, dir))
-    })
+    directions.forEach((dir) => {
+      knightMoves.push(this.peekPiece(currentPosition, dir));
+    });
 
-    console.log(currentPosition);
-    
+    let copyKnightMoves = knightMoves;
 
-    let copyKnightMoves = knightMoves
-
-    copyKnightMoves.forEach(pos => {
-      knightMoves = knightMoves.filter(move => !this.isOwnPiece(move))
-      if(this.containsPosition(pos, knightMoves) && this.canItBeCaptured(pos)){
+    copyKnightMoves.forEach((pos) => {
+      knightMoves = knightMoves.filter((move) => !this.isOwnPiece(move));
+      if (
+        this.containsPosition(pos, knightMoves) &&
+        this.canItBeCaptured(pos)
+      ) {
         this.canBeCaptured.push(pos);
       }
-    })
+    });
 
-    return knightMoves
+    return knightMoves;
   }
 
-  getDirectionalMoves(directions: number[]): Position[]{
+  getDirectionalMoves(directions: number[]): Position[] {
     if (!this.selectedSquare) return [];
     let straightMoves: Position[] = [];
 
     directions.forEach((dir) => {
-
       let currentPosition = this.selectedSquare!;
       while (true) {
-
-        if(this.isOwnPiece(currentPosition)){
-          break
+        if (this.isOwnPiece(currentPosition)) {
+          break;
         }
-        
-        if (this.canItBeCaptured(currentPosition)){
+
+        if (this.canItBeCaptured(currentPosition)) {
           this.canBeCaptured.push(currentPosition);
           straightMoves.push(currentPosition);
-          break
+          break;
         }
-        
-        if(this.isLastAvailableSquare(currentPosition, dir)) {
+
+        if (this.isLastAvailableSquare(currentPosition, dir)) {
           straightMoves.push(currentPosition);
-          break
+          break;
         }
 
         straightMoves.push(currentPosition);
         currentPosition = this.peekPiece(currentPosition, dir);
       }
-    });    
+    });
 
     return straightMoves;
   }
 
-  isOwnPiece(pos: Position){
-    if(!this.currentBoard[pos[0]][pos[1]]) return false
-    if(this.arrayEqual(this.selectedSquare, pos)) return false
-    
-    if(this.whiteToPlay && this.currentBoard[pos[0]][pos[1]] == this.currentBoard[pos[0]][pos[1]].toUpperCase()){
-      return true
-    }
-    if(!this.whiteToPlay && this.currentBoard[pos[0]][pos[1]] == this.currentBoard[pos[0]][pos[1]].toLowerCase()){
-      return true
-    }
+  isOwnPiece(pos: Position) {
+    if (!this.currentBoard[pos[0]][pos[1]]) return false;
+    if (this.arrayEqual(this.selectedSquare, pos)) return false;
 
-    return false
-  }
-
-  canItBeCaptured(pos: Position): Boolean{
-    if(this.arrayEqual(this.selectedSquare, pos)) return false
     if (
-      this.currentBoard[pos[0]][pos[1]]
+      this.whiteToPlay &&
+      this.currentBoard[pos[0]][pos[1]] ==
+        this.currentBoard[pos[0]][pos[1]].toUpperCase()
     ) {
       return true;
     }
-    return false
+    if (
+      !this.whiteToPlay &&
+      this.currentBoard[pos[0]][pos[1]] ==
+        this.currentBoard[pos[0]][pos[1]].toLowerCase()
+    ) {
+      return true;
+    }
+
+    return false;
+  }
+
+  canItBeCaptured(pos: Position): Boolean {
+    if (this.arrayEqual(this.selectedSquare, pos)) return false;
+    if (this.currentBoard[pos[0]][pos[1]]) {
+      return true;
+    }
+    return false;
   }
 
   peekPiece(pos: Position, dir: number): Position {
@@ -227,7 +263,6 @@ export class ChessboardComponent implements OnInit {
   }
 
   isLastAvailableSquare(pos: Position, dir: number): Boolean {
-
     // check left and right border
 
     if (
@@ -243,7 +278,6 @@ export class ChessboardComponent implements OnInit {
       (pos[1] == 7 && [9, 8, 7].includes(dir))
     )
       return true;
-
 
     return false;
   }
