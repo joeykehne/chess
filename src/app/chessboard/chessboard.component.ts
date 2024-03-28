@@ -134,20 +134,46 @@ export class ChessboardComponent implements OnInit {
     let directions: number[] = [];
     let currentPosition = this.selectedSquare!;
 
-    if (this.whiteToPlay) directions.push(-1, -9, 7);
-    if (!this.whiteToPlay) directions.push(1, 9, -7);
+    if (this.whiteToPlay) {
+      directions.push(-1, -9, 7);
 
-    if (this.whiteToPlay && currentPosition[0] == 6) directions.push(-2);
-    if (!this.whiteToPlay && currentPosition[0] == 1) directions.push(2);
+      let pawnPeek = this.numberToPosition(
+        this.positionToNumber(currentPosition) - 1
+      );
 
-    if(currentPosition[1] == 0) directions = directions.filter(dir => ![-9, -7].includes(dir))
-    
-    
+      if (
+        currentPosition[0] == 6 &&
+        !this.currentBoard[pawnPeek[0]][pawnPeek[1]]
+      ) {
+        directions.push(-2);
+      }
+    }
+    if (!this.whiteToPlay) {
+      directions.push(1, 9, -7);
+
+      let pawnPeek = this.numberToPosition(
+        this.positionToNumber(currentPosition) + 1
+      );
+
+      if (
+        currentPosition[0] == 1 &&
+        !this.currentBoard[pawnPeek[0]][pawnPeek[1]]
+      ) {
+        directions.push(2);
+      }
+    }
+
+    if (currentPosition[1] == 0)
+      directions = directions.filter((dir) => ![-9, -7].includes(dir));
+
     directions.forEach((dir) => {
       currentPosition = this.selectedSquare!;
       currentPosition = this.peekPiece(currentPosition, dir);
 
-      if ((dir == -1 || dir == 1 || dir == -2 || dir == 2) && this.currentBoard[currentPosition[0]][currentPosition[1]]) {
+      if (
+        (dir == -1 || dir == 1 || dir == -2 || dir == 2) &&
+        this.currentBoard[currentPosition[0]][currentPosition[1]]
+      ) {
         return;
       }
 
